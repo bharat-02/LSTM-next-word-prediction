@@ -50,9 +50,9 @@ lowercasing) with a clean character-level language model:
 
 | Config | Layers × Hidden | Embed | Dropout | Params | Val loss |
 |---|---|---|---|---|---|
+| Demo (deployed `best.pt`; short GPU run) | 2 × 128 | 64 | 0.3 | 244,355 | **1.7292** |
+| B (earlier full run, superseded) | 2 × 256 | 128 | 0.2 | 947,395 | 1.6861 |
 | A (partial: 4 epochs, CPU, stopped) | 1 × 256 | 128 | 0.2 | 421,059 | 1.7445 |
-| B (selected, full run on CUDA) | 2 × 256 | 128 | 0.2 | 947,395 | **1.6861** |
-| C (not run — stopped per user) | 2 × 128 | 64 | 0.3 | 244,355 | — |
 
 - Optimizer Adam (lr 3e-3), gradient clip 1.0, batch 128, early stopping
   (patience 5, max 30 epochs). Loss: cross-entropy over next-char logits.
@@ -102,13 +102,13 @@ plus samples at temperatures 0.5 / 0.8 / 1.0.
 
 ### Results (actual, this machine)
 
-- Device: **cuda — NVIDIA GeForce RTX 3050 6GB Laptop GPU** (`torch 2.14.1+cu126`, `cuda_available=True`); CPU-only run used for config A partial.
-- Config B, 12 epochs (early stopped, patience 5; best val at epoch 7):
-  train loss 1.3996 (final) / best val loss **1.6861** (ppl 5.40) / test loss **1.5721** (ppl **4.82**).
-- Training time: **421.9 s (~7 min)** on CUDA, batch 128, seq 100.
-- Overfitting check: mild and controlled — train loss kept falling (2.04 → 1.40)
-  while val plateaued ≈1.69 after epoch 6; early stopping halted at epoch 12.
-  Test loss (1.57, final-act region) is *below* val, so no generalization collapse.
+- Device: **cuda — NVIDIA GeForce RTX 3050 6GB Laptop GPU** (`torch 2.14.1+cu126`).
+- Deployed demo model (2×128, light run for a short GPU session): 10 epochs,
+  train loss 1.6539 (final) / best val loss **1.7292** (ppl 5.64) / test loss **1.6518** (ppl **5.22**).
+- Training time: **283.3 s (~5 min)** on CUDA, batch 64, seq 100. GPU back to 0% after the run.
+- App generates a short demo continuation (~2–3 words after the seed).
+- Overfitting check: none problematic — train/val track closely (1.65 vs 1.73);
+  small capacity keeps the demo light by design (resume/GitHub scope).
 
 ## 8. Text generation
 

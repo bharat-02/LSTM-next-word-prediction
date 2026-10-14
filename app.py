@@ -28,14 +28,15 @@ except Exception as e:
     st.stop()
 
 seed = st.text_input("Seed text", "To be, or not to be")
-length = st.slider("Characters to generate", 50, 1000, 300, 50)
-temperature = st.slider("Temperature (lower = predictable, higher = varied)",
-                        0.1, 2.0, 0.8, 0.1)
+
+# Fixed generation settings (previously sliders): ~2-3 words for a short demo.
+LENGTH = 15
+TEMPERATURE = cfg.DEFAULT_TEMPERATURE
 
 if st.button("Generate"):
     try:
         rng = np.random.default_rng()
-        text = generate_text(model, seed, length, float(temperature),
+        text = generate_text(model, seed, LENGTH, TEMPERATURE,
                              char2idx, idx2char, seq_len=seq_len, device=device, rng=rng)
         st.text_area("Generated text", text, height=300)
     except ValueError as e:
