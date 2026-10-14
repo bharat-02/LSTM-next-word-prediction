@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Artifacts: keep final model + vocab/config/history in git; ignore runs & legacy blobs
+runs/
+*.h5
+*.pickle
+*.pt
+!artifacts/best.pt
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Secrets
+.env
+*.key
+*.pem

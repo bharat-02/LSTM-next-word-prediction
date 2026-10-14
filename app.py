@@ -1,34 +1,42 @@
-import streamlit as st
+"""Streamlit app: Shakespeare-style text generation with the char-level LSTM."""
 import numpy as np
-import pickle
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.sequence import pad_sequences
+import streamlit as st
+import torch
 
-#Load the LSTM Model
-model=load_model('next_word_lstm.h5')
+import config as cfg
+from generate import generate_text, load_artifacts, resolve_device
 
-#3 Laod the tokenizer
-with open('tokenizer.pickle','rb') as handle:
-    tokenizer=pickle.load(handle)
 
-# Function to predict the next word
-def predict_next_word(model, tokenizer, text, max_sequence_len):
-    token_list = tokenizer.texts_to_sequences([text])[0]
-    if len(token_list) >= max_sequence_len:
-        token_list = token_list[-(max_sequence_len-1):]  # Ensure the sequence length matches max_sequence_len-1
-    token_list = pad_sequences([token_list], maxlen=max_sequence_len-1, padding='pre')
-    predicted = model.predict(token_list, verbose=0)
-    predicted_word_index = np.argmax(predicted, axis=1)
-    for word, index in tokenizer.word_index.items():
-        if index == predicted_word_index:
-            return word
-    return None
+@st.cache_resource
+def get_model():
+    device = resolve_device("auto")
+    model, char2idx, idx2char, seq_len = load_artifacts(
+        cfg.CHECKPOINT_PATH, device=device)
+    return model, char2idx, idx2char, seq_len, device
 
-# streamlit app
-st.title("Next Word Prediction With LSTM And Early Stopping")
-input_text=st.text_input("Enter the sequence of Words","To be or not to")
-if st.button("Predict Next Word"):
-    max_sequence_len = model.input_shape[1] + 1  # Retrieve the max sequence length from the model input shape
-    next_word = predict_next_word(model, tokenizer, input_text, max_sequence_len)
-    st.write(f'Next word: {next_word}')
 
+st.title("Hamlet LSTM — Shakespeare-style Text Generation")
+st.caption("Character-level LSTM trained on Shakespeare's *Hamlet*. "
+           "Samples are model pastiches, not authentic quotes.")
+
+try:
+    model, char2idx, idx2char, seq_len, device = get_model()
+    st.success(f"Model loaded (device={device}, vocab={len(char2idx)}, seq_len={seq_len}).")
+except Exception as e:
+    st.error(f"Could not load model from {cfg.CHECKPOINT_PATH}: {e}\n\n"
+             "Train first: `python train.py`.")
+    st.stop()
+
+seed = st.text_input("Seed text", "To be, or not to be")
+length = st.slider("Characters to generate", 50, 1000, 300, 50)
+temperature = st.slider("Temperature (lower = predictable, higher = varied)",
+                        0.1, 2.0, 0.8, 0.1)
+
+if st.button("Generate"):
+    try:
+        rng = np.random.default_rng()
+        text = generate_text(model, seed, length, float(temperature),
+                             char2idx, idx2char, seq_len=seq_len, device=device, rng=rng)
+        st.text_area("Generated text", text, height=300)
+    except ValueError as e:
+        st.error(str(e))
