@@ -50,9 +50,9 @@ lowercasing) with a clean character-level language model:
 
 | Config | Layers × Hidden | Embed | Dropout | Params | Val loss |
 |---|---|---|---|---|---|
-| A | 1 × 256 | 128 | 0.2 | … | … |
-| B (selected) | 2 × 256 | 128 | 0.2 | … | … |
-| C | 2 × 128 | 64 | 0.3 | … | … |
+| A (partial: 4 epochs, CPU, stopped) | 1 × 256 | 128 | 0.2 | 421,059 | 1.7445 |
+| B (selected, full run on CUDA) | 2 × 256 | 128 | 0.2 | 947,395 | **1.6861** |
+| C (not run — stopped per user) | 2 × 128 | 64 | 0.3 | 244,355 | — |
 
 - Optimizer Adam (lr 3e-3), gradient clip 1.0, batch 128, early stopping
   (patience 5, max 30 epochs). Loss: cross-entropy over next-char logits.
@@ -98,11 +98,13 @@ plus samples at temperatures 0.5 / 0.8 / 1.0.
 
 ### Results (actual, this machine)
 
-- Device: …
-- Train loss / Val loss / Test loss: …
-- Test perplexity: …
-- Training time: …
-- Overfitting check: …
+- Device: **cuda — NVIDIA GeForce RTX 3050 6GB Laptop GPU** (`torch 2.14.1+cu126`, `cuda_available=True`); CPU-only run used for config A partial.
+- Config B, 12 epochs (early stopped, patience 5; best val at epoch 7):
+  train loss 1.3996 (final) / best val loss **1.6861** (ppl 5.40) / test loss **1.5721** (ppl **4.82**).
+- Training time: **421.9 s (~7 min)** on CUDA, batch 128, seq 100.
+- Overfitting check: mild and controlled — train loss kept falling (2.04 → 1.40)
+  while val plateaued ≈1.69 after epoch 6; early stopping halted at epoch 12.
+  Test loss (1.57, final-act region) is *below* val, so no generalization collapse.
 
 ## 8. Text generation
 
@@ -116,9 +118,25 @@ python -m src.inference.generator --seed "To be, or not to be" --length 300 --te
   unknown chars are reported; temperature must be > 0.
 - Streamlit app: `streamlit run app.py` (seed box + length/temperature sliders).
 
-### Samples (actual)
+### Samples (actual, seed `To be, or not to be`, 300 chars)
 
-…
+temperature 0.5 (most coherent; learns speaker names, verse breaks, Early Modern spelling):
+> To be, or not to be our with proue of the speciall:
+> But the speech shall speake of the Armes
+>
+>    Ham. Hamlet come so but my Lord, ...
+
+temperature 0.8 (varied; some novel word-forms, punctuation mostly intact):
+> To be, or not to before,
+> But not in this disposition;
+> Seick you standed not them
+>
+>    Polon. I do my Mothers to that? ...
+
+temperature 1.0 (most varied; spelling degrades, e.g. `Vnotiue`, `Moniuic`):
+> To be, or not to be suites
+> Vnotiue? Lackes you must
+> Paistoring ou; naue, this giue it you my all agaid, ...
 
 ## 9. Project structure
 
