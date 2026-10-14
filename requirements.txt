@@ -14,7 +14,7 @@
 # (large CUDA-bundled) torch wheel from PyPI on Windows.
 
 # --- deep learning (installed FIRST from the index above) ---
-# torch==2.14.1+cpu  (verified this session; GPU: torch==2.14.1+cu126)
+# torch==2.14.1+cu126  (verified this session, cuda_available=True on RTX 3050)
 
 # --- core ---
 numpy==1.26.4

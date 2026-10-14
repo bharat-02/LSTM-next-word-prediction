@@ -59,20 +59,24 @@ lowercasing) with a clean character-level language model:
 
 ## 5. Installation
 
-Python 3.11, Windows 64-bit. Install `torch` **first** from the PyTorch index,
-then the rest:
+Project uses an isolated venv (`.venv`, Python 3.11, Windows 64-bit).
+Main system env was cleaned of project packages after training.
 
 ```bat
-"C:\Program Files\Python311\python.exe" -m pip install torch --index-url https://download.pytorch.org/whl/cpu
-"C:\Program Files\Python311\python.exe" -m pip install -r requirements.txt
+"C:\Program Files\Python311\python.exe" -m venv .venv
+.\.venv\Scripts\python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cu126
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -c "import torch; print(torch.__version__, torch.cuda.is_available())"
 ```
 
-GPU (RTX 3050 6 GB, CUDA 12.6 build) — same code, no changes needed:
+CPU-only alternative (no GPU):
 
 ```bat
-python -m pip install torch --index-url https://download.pytorch.org/whl/cu126
-python -c "import torch; print(torch.cuda.is_available())"
+.\.venv\Scripts\python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cpu
 ```
+
+All commands below assume the venv python: `.\.venv\Scripts\python.exe -m ...`
+(or activate it first with `.\.venv\Scripts\activate`).
 
 ## 6. Training
 
