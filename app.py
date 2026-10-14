@@ -3,8 +3,8 @@ import numpy as np
 import streamlit as st
 import torch
 
-import config as cfg
-from generate import generate_text, load_artifacts, resolve_device
+from src import config as cfg
+from src.inference.generator import generate_text, load_artifacts, resolve_device
 
 
 @st.cache_resource

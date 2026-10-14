@@ -46,12 +46,12 @@
 - `app.py` word-level artifacts (`next_word_lstm.h5`, `tokenizer.pickle`) don't exist → old app can't run; replaced by char-level `generate.py` + updated Streamlit app.
 
 ## 4. File map (target)
-- `config.py` — single source of truth (paths, splits, seq len, model/training hyperparams, device).
-- `data_preprocessing.py` — clean → vocab → encode → contiguous splits → sequences.
-- `model.py` — `CharLSTM` (Embedding-LSTM-Dropout-Linear), param count, checkpoint save/load.
-- `train.py` — train/val loop, early stopping, perplexity, history.json, best.pt.
-- `generate.py` — `load_artifacts()` + `generate_text(seed, n, temperature)` + CLI.
-- `evaluate.py` — test loss/ppl + multi-temperature samples.
+- `src/config.py` — single source of truth (paths, splits, seq len, model/training hyperparams, device).
+- `src/data/preprocessing.py` — clean → vocab → encode → contiguous splits → sequences.
+- `src/models/lstm.py` — `CharLSTM` (Embedding-LSTM-Dropout-Linear), param count, checkpoint save/load.
+- `src/training/trainer.py` — train/val loop, early stopping, perplexity, history.json, best.pt.
+- `src/inference/generator.py` — `load_artifacts()` + `generate_text(seed, n, temperature)` + CLI.
+- `src/inference/evaluator.py` — test loss/ppl + multi-temperature samples.
 - `tests/test_char_lstm.py` — preprocessing, vocab roundtrip, shapes, short train, reload, generation, temperature/empty-input validation.
 - Artifacts: `artifacts/hamlet_clean.txt`, `artifacts/vocab.json`, `artifacts/config.json`, `artifacts/best.pt`, `artifacts/history.json`. Note: `hamlet_clean.txt` also saved at repo root? No — keep in `artifacts/` to avoid clutter; original `hamlet.txt` stays at root.
 - `app.py` — rewritten for char-level generation (keeps Streamlit entry point, same filename to avoid restructuring).

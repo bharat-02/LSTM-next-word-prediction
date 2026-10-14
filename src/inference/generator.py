@@ -7,8 +7,8 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-import config as cfg
-from model import load_checkpoint
+from src import config as cfg
+from src.models.lstm import load_checkpoint
 
 
 def resolve_device(pref="auto"):

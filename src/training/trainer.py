@@ -18,9 +18,9 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
-import config as cfg
-from data_preprocessing import prepare_corpus
-from model import CharLSTM, count_parameters, save_checkpoint
+from src import config as cfg
+from src.data.preprocessing import prepare_corpus
+from src.models.lstm import CharLSTM, count_parameters, save_checkpoint
 
 
 def set_seed(seed=cfg.SEED):
@@ -50,7 +50,8 @@ def run_epoch(model, loader, criterion, optimizer, device, train=True):
         if train:
             optimizer.zero_grad()
         logits, _ = model(Xb)                      # (B, T, V)
-        loss = criterion(logits.reshape(-1, logits.size(-1)), yb.reshape(-1))
+        # Next-char task: one target per window -> use last timestep only.
+        loss = criterion(logits[:, -1, :], yb)
         if train:
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), cfg.GRAD_CLIP)
@@ -68,7 +69,7 @@ def evaluate_loss(model, loader, criterion, device):
     for Xb, yb in loader:
         Xb, yb = Xb.to(device), yb.to(device)
         logits, _ = model(Xb)
-        loss = criterion(logits.reshape(-1, logits.size(-1)), yb.reshape(-1))
+        loss = criterion(logits[:, -1, :], yb)
         total += loss.item() * Xb.size(0)
         n += Xb.size(0)
     return total / n

@@ -77,9 +77,9 @@ python -c "import torch; print(torch.cuda.is_available())"
 ## 6. Training
 
 ```bat
-python train.py                          :: defaults (2x256, seq 100, batch 128)
-python train.py --layers 1 --hidden 256  :: config A
-python train.py --device cuda            :: force GPU (warns + falls back if absent)
+python -m src.training.trainer                          :: defaults (2x256, seq 100, batch 128)
+python -m src.training.trainer --layers 1 --hidden 256  :: config A
+python -m src.training.trainer --device cuda            :: force GPU (warns + falls back if absent)
 ```
 
 Artifacts: `artifacts/hamlet_clean.txt`, `artifacts/vocab.json`,
@@ -90,7 +90,7 @@ final test loss/perplexity. Curves: `artifacts/history.json`.
 ## 7. Evaluation
 
 ```bat
-python evaluate.py --seed "To be, or not to be" --length 300
+python -m src.inference.evaluator --seed "To be, or not to be" --length 300
 ```
 
 Reports held-out test loss/perplexity (test Act-V region, never trained on)
@@ -107,7 +107,7 @@ plus samples at temperatures 0.5 / 0.8 / 1.0.
 ## 8. Text generation
 
 ```bat
-python generate.py --seed "To be, or not to be" --length 300 --temperature 0.8
+python -m src.inference.generator --seed "To be, or not to be" --length 300 --temperature 0.8
 ```
 
 - Lower temperature (≈0.5): more predictable, repetitive.
@@ -124,12 +124,12 @@ python generate.py --seed "To be, or not to be" --length 300 --temperature 0.8
 
 | File | Role |
 |---|---|
-| `config.py` | Hyperparameters + paths (single source of truth) |
-| `data_preprocessing.py` | Cleaning, vocab, contiguous splits, sequences |
-| `model.py` | `CharLSTM`, param count, checkpoint save/load |
-| `train.py` | Training loop, early stopping, test eval |
-| `generate.py` | Temperature sampling + CLI |
-| `evaluate.py` | Test metrics + multi-temperature samples |
+| `src/config.py` | Hyperparameters + paths (single source of truth) |
+| `src/data/preprocessing.py` | Cleaning, vocab, contiguous splits, sequences |
+| `src/models/lstm.py` | `CharLSTM`, param count, checkpoint save/load |
+| `src/training/trainer.py` | Training loop, early stopping, test eval |
+| `src/inference/generator.py` | Temperature sampling + CLI |
+| `src/inference/evaluator.py` | Test metrics + multi-temperature samples |
 | `app.py` | Streamlit generation UI |
 | `tests/test_char_lstm.py` | 11 automated tests |
 | `brain.md` / `plan.md` | Design notes / execution plan |

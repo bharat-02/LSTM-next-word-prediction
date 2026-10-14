@@ -111,7 +111,7 @@ def prepare_corpus(raw_path="hamlet.txt", clean_path=None,
                    vocab_path=None, seq_len=100, stride=1,
                    train_frac=0.80, val_frac=0.10):
     """End-to-end: clean -> vocab -> splits -> integer sequences."""
-    import config as cfg
+    from src import config as cfg
 
     clean_path = clean_path or cfg.CLEAN_PATH
     vocab_path = vocab_path or cfg.VOCAB_PATH

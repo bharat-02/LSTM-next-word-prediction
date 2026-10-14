@@ -6,8 +6,8 @@ import numpy as np
 import pytest
 import torch
 
-import config as cfg
-from data_preprocessing import (
+from src import config as cfg
+from src.data.preprocessing import (
     build_vocab,
     clean_text,
     decode,
@@ -18,8 +18,8 @@ from data_preprocessing import (
     save_vocab,
     split_corpus,
 )
-from generate import _filter_seed, generate_text
-from model import CharLSTM, count_parameters, load_checkpoint, save_checkpoint
+from src.inference.generator import _filter_seed, generate_text
+from src.models.lstm import CharLSTM, count_parameters, load_checkpoint, save_checkpoint
 
 SEED = "To be, or not to be"
 
@@ -95,7 +95,7 @@ def test_short_train_runs_and_reloads(tmp_path):
     loss = crit(logits.reshape(-1, V), y.reshape(-1))
     loss.backward()
     opt.step()
-    assert float(loss) > 0
+    assert loss.item() > 0
 
     c2i = {chr(65 + i): i for i in range(V)}
     i2c = {i: chr(65 + i) for i in range(V)}
@@ -108,6 +108,26 @@ def test_short_train_runs_and_reloads(tmp_path):
         a, _ = m(X[:2])
         b, _ = m2(X[:2])
     assert torch.allclose(a, b, atol=1e-6)
+
+
+def test_next_char_loss_uses_last_timestep():
+    """Regression test: (B,T) windows + (B,) next-char targets must align."""
+    import torch.nn as nn
+    from torch.utils.data import DataLoader, TensorDataset
+
+    from src.training.trainer import evaluate_loss, run_epoch
+
+    torch.manual_seed(0)
+    V, B, T = 67, 8, 20
+    m = CharLSTM(V, embed_dim=8, hidden_dim=16, num_layers=1, dropout=0.0)
+    X = torch.randint(0, V, (32, T))
+    y = torch.randint(0, V, (32,))
+    loader = DataLoader(TensorDataset(X, y), batch_size=B)
+    opt = torch.optim.Adam(m.parameters(), lr=1e-2)
+    tr = run_epoch(m, loader, nn.CrossEntropyLoss(), opt,
+                   torch.device("cpu"), train=True)
+    va = evaluate_loss(m, loader, nn.CrossEntropyLoss(), torch.device("cpu"))
+    assert tr > 0 and va > 0
 
 
 def _tiny_model():

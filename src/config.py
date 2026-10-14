@@ -1,7 +1,7 @@
 """Shared configuration for the Hamlet character-level LSTM project."""
 import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 RAW_PATH = os.path.join(BASE_DIR, "hamlet.txt")
 CLEAN_PATH = os.path.join(BASE_DIR, "artifacts", "hamlet_clean.txt")

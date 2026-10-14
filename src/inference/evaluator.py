@@ -8,10 +8,10 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
-import config as cfg
-from data_preprocessing import prepare_corpus
-from generate import generate_text, load_artifacts, resolve_device
-from train import evaluate_loss
+from src import config as cfg
+from src.data.preprocessing import prepare_corpus
+from src.inference.generator import generate_text, load_artifacts, resolve_device
+from src.training.trainer import evaluate_loss
 
 
 def main():
